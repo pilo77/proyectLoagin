@@ -25,14 +25,26 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(LoginRequest request) {
+        System.out.println(request);
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        UserDetails user=userRepository.findByUsername(request.getUsername()).orElseThrow();
+        System.out.println(request.getUsername()+ request.getPassword());
+        User user=userRepository.findByUsername(request.getUsername()).orElseThrow();
         String token=jwtService.getToken(user);
-        return AuthResponse.builder()
-                .token(token)
-                .build();
+        System.out.println(user);
+        if (user.getRole().equals("ADMIN")){
 
+        }else {
+            System.out.println(user.getRole());
+            return AuthResponse.builder()
+                    .token(token)
+                    .build();
+
+        }
+
+
+        return null;
     }
+
 
     public AuthResponse register(RegisterRequest request) {
         User user = User.builder()

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DemoController {
 
-    @PostMapping(value = "demo")
+    @PostMapping(value = "/demo")
     public String welcome() {
 
         return "welcome form secure endpoint";
