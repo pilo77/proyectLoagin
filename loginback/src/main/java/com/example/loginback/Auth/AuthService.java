@@ -25,24 +25,17 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse login(LoginRequest request) {
-        System.out.println(request);
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        System.out.println(request.getUsername()+ request.getPassword());
-        User user=userRepository.findByUsername(request.getUsername()).orElseThrow();
-        String token=jwtService.getToken(user);
-        System.out.println(user);
-        if (user.getRole().equals("ADMIN")){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+        );
 
-        }else {
-            System.out.println(user.getRole());
-            return AuthResponse.builder()
-                    .token(token)
-                    .build();
+        User user = userRepository.findByUsername(request.getUsername()).orElseThrow();
+        String token = jwtService.getToken(user); // El token debe contener información de rol
 
-        }
-
-
-        return null;
+        // Devolver el token independientemente del rol, pero restringir acciones en otro lugar
+        return AuthResponse.builder()
+                .token(token)
+                .build();
     }
 
 

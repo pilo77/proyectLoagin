@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/demo")
 @RequiredArgsConstructor
 public class DemoController {
 
-    @PostMapping(value = "/demo")
+    @PostMapping(value = "/ver")
     public String welcome() {
 
         return "welcome form secure endpoint";

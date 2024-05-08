@@ -3,6 +3,9 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -39,5 +42,19 @@ public class UserService {
             return userDTO;
         }
         return null;
+    }
+
+    public List<UserDTO> getAllUsers() {
+        List<User> users = userRepository.findAll(); // Obtener todos los usuarios
+
+        return users.stream() // Transformar la lista de usuarios a UserDTO
+                .map(user -> UserDTO.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .firstname(user.getFirstname())
+                        .lastname(user.getLastname())
+                        .country(user.getCountry())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

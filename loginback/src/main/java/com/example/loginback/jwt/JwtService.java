@@ -26,61 +26,64 @@ public class JwtService {
     private String SECRET_KEY;
 
     public String getToken(User user) {
-        return getToken(new HashMap<>(), user);
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", user.getId());
+        extraClaims.put("firstName", user.getFirstname());
+        extraClaims.put("lastName", user.getLastname());
+        extraClaims.put("role", user.getRole().name()); // Agregar el rol del usuario
+        return getToken(extraClaims, user.getUsername());
     }
 
-    private String getToken(Map<String,Object> extraClaims, User user) {
-        return Jwts
-                .builder()
-                .claims(extraClaims)
-                .claim("userId", user.getId())
-                .claim(("firstName"), user.getFirstname())
-                .claim("lastName", user.getLastname())
-                .subject(user.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis()+1000*60*24))
-                .signWith(getKey())
-                .compact();
+    private String getToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims) // Agregar las reclamaciones al token
+                .setSubject(subject) // Nombre de usuario como sujeto
+                .setIssuedAt(new Date(System.currentTimeMillis())) // Fecha de emisión
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // Expira en 24 horas
+                .signWith(getKey()) // Firmar con la clave secreta
+                .compact(); // Compactar el token para devolverlo
     }
 
+
+    // Método para obtener la clave secreta
     private SecretKey getKey() {
-        byte[] keyBytes=Decoders.BASE64.decode(SECRET_KEY);
-        return Keys.hmacShaKeyFor(keyBytes);
+        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY); // Decodificar la clave secreta
+        return Keys.hmacShaKeyFor(keyBytes); // Crear la clave secreta
     }
 
+    // Método para obtener el nombre de usuario del token
     public String getUsernameFromToken(String token) {
-        return getClaim(token, Claims::getSubject);
+        return getClaim(token, Claims::getSubject); // Obtener el sujeto del token
     }
 
+    // Método para verificar si el token es válido
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username=getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername())&& !isTokenExpired(token));
+        final String username = getUsernameFromToken(token); // Obtener el nombre de usuario
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token); // Verificar coincidencia y expiración
     }
 
-    private Claims getAllClaims(String token)
-    {
-        return Jwts
-                .parser()
-                .verifyWith(getKey())
+    // Método para obtener todas las reclamaciones del token
+    private Claims getAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(getKey()) // Verificar con la clave secreta
                 .build()
                 .parseSignedClaims(token)
-                .getPayload();
+                .getPayload(); // Obtener las reclamaciones del token
     }
 
-    public <T> T getClaim(String token, Function<Claims,T> claimsResolver)
-    {
-        final Claims claims=getAllClaims(token);
-        return claimsResolver.apply(claims);
+    // Método para obtener una reclamación específica
+    public <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaims(token); // Obtener todas las reclamaciones
+        return claimsResolver.apply(claims); // Aplicar la función para obtener la reclamación específica
     }
 
-    private Date getExpiration(String token)
-    {
-        return getClaim(token, Claims::getExpiration);
+    // Método para obtener la fecha de expiración del token
+    private Date getExpiration(String token) {
+        return getClaim(token, Claims::getExpiration); // Obtener la fecha de expiración
     }
 
-    private boolean isTokenExpired(String token)
-    {
-        return getExpiration(token).before(new Date());
+    // Método para verificar si el token ha expirado
+    private boolean isTokenExpired(String token) {
+        return getExpiration(token).before(new Date()); // Comparar con la fecha actual
     }
-
 }
