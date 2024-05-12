@@ -30,7 +30,7 @@ public class UserService {
     public UserDTO getUser(Integer id) {
         User user= userRepository.findById(id).orElse(null);
 
-        if (user!=null)
+        if (user!=null)//if
         {
             UserDTO userDTO = UserDTO.builder()
                     .id(user.id)
